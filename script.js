@@ -1,64 +1,63 @@
 const expenseNameInput = document.getElementById("expenseName");
 const expenseAmountInput = document.getElementById("expenseAmount");
-const addButton = document.querySelector("button");
+const expenseCategoryInput = document.getElementById("expenseCategory");
+const addExpenseButton = document.getElementById("addExpense");
 const expenseList = document.getElementById("expenseList");
-const totalAmountSpan = document.getElementById("totalAmount");
+const totalDisplay = document.getElementById("total");
 
-
-//Load saved expenses or start with empty array
 let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 
-// Display saved expenses on page load
-expenses.forEach(function (expense) {
-    addExpenseToList(expense.name, expense.amount);
-});
+function saveExpenses() {
+    localStorage.setItem("expenses", JSON.stringify(expenses));
+}
 
-updateTotal();
+function calculateTotal() {
+    const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    totalDisplay.textContent = total.toFixed(2);
+}
 
-addButton.addEventListener("click", function () {
-    const name = expenseNameInput.value;
-    const amount = expenseAmountInput.value;
+function renderExpenses() {
+    expenseList.innerHTML = "";
 
-    if (name === "" || amount === "") {
-        alert("please enter both name and amount");
+    expenses.forEach((expense, index) => {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+      <span>${expense.name} (${expense.category}) - $${expense.amount}</span>
+      <button class="delete-btn">X</button>
+    `;
+
+        li.querySelector("button").addEventListener("click", () => {
+            expenses.splice(index, 1);
+            saveExpenses();
+            renderExpenses();
+            calculateTotal();
+        });
+
+        expenseList.appendChild(li);
+    });
+}
+
+addExpenseButton.addEventListener("click", () => {
+    const name = expenseNameInput.value.trim();
+    const amount = parseFloat(expenseAmountInput.value);
+    const category = expenseCategoryInput.value;
+
+    if (name === "" || isNaN(amount) || amount <= 0) {
+        alert("Please enter valid expense details.");
         return;
     }
 
-    expenses.push({ name, amount });
-    localStorage.setItem("expenses", JSON.stringify(expenses));
+    expenses.push({ name, amount, category });
 
-    addExpenseToList(name, amount);
-    updateTotal();
+    saveExpenses();
+    renderExpenses();
+    calculateTotal();
 
     expenseNameInput.value = "";
     expenseAmountInput.value = "";
+    expenseCategoryInput.value = "Food";
 });
 
-
-
-function addExpenseToList(name, amount) {
-    const li = document.createElement("li");
-    li.textContent = `${name}: ${amount}`;
-
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "X";
-
-    deleteButton.addEventListener("click", function () {
-        expenseList.removeChild(li);
-
-        expenses = expenses.filter(
-            (expense) => !(expense.name === name && expense.amount === amount)
-        );
-
-        localStorage.setItem("expenses", JSON.stringify(expenses));
-        updateTotal();
-    });
-
-    li.appendChild(deleteButton);
-    expenseList.appendChild(li);
-}
-
-function updateTotal() {
-    const total = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
-    totalAmountSpan.textContent = total;
-}
+renderExpenses();
+calculateTotal();
