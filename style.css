@@ -2,9 +2,7 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f0f2f5;
     padding: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+
 }
 
 h1 {
@@ -82,4 +80,18 @@ li span {
 
 .delete-btn:hover {
     background-color: #d32f2f;
+}
+
+.container {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+.left-panel {
+    width: 300px;
+}
+
+.right-panel {
+    flex: 1;
 }
